@@ -1,3 +1,176 @@
+
+# Old functions that work on base graphics
+
+histrc <-
+function (x, breaks = "Sturges", freq = NULL, probability = !freq, 
+    include.lowest = TRUE, right = TRUE, density = NULL, angle = 45, 
+    col = NULL, border = NULL, main = paste("Histogram of", xname), 
+    xlim = range(breaks), ylim = NULL, xlab = xname, ylab, axes = TRUE, 
+    plot = TRUE, labels = FALSE, nclass = NULL, ...) 
+{
+    if (!is.numeric(x)) 
+        stop("'x' must be numeric")
+    xname <- paste(deparse(substitute(x), 500), collapse = "\n")
+    n <- length(x <- x[is.finite(x)])
+    use.br <- !missing(breaks)
+    if (use.br) {
+        if (!missing(nclass)) 
+            warning("'nclass' not used when 'breaks' is specified")
+    }
+    else if (!is.null(nclass) && length(nclass) == 1) 
+        breaks <- nclass
+    use.br <- use.br && (nB <- length(breaks)) > 1
+    if (use.br) 
+        breaks <- sort(breaks)
+    else {
+        if (!include.lowest) {
+            include.lowest <- TRUE
+            warning("'include.lowest' ignored as 'breaks' is not a vector")
+        }
+        if (is.character(breaks)) {
+            breaks <- match.arg(tolower(breaks), c("sturges", 
+                "fd", "freedman-diaconis", "scott"))
+            breaks <- switch(breaks, sturges = nclass.Sturges(x), 
+                `freedman-diaconis` = , fd = nclass.FD(x), scott = nclass.scott(x), 
+                stop("unknown 'breaks' algorithm"))
+        }
+        else if (is.function(breaks)) {
+            breaks <- breaks(x)
+        }
+        if (!is.numeric(breaks) || !is.finite(breaks) || breaks < 
+            1) 
+            stop("invalid number of 'breaks'")
+        breaks <- pretty(range(x), n = breaks, min.n = 1)
+        nB <- length(breaks)
+        if (nB <= 1) 
+            stop("hist.default: pretty() error, breaks=", format(breaks))
+    }
+    h <- diff(breaks)
+    equidist <- !use.br || diff(range(h)) < 1e-07 * mean(h)
+    if (!use.br && any(h <= 0)) 
+        stop("'breaks' are not strictly increasing")
+    freq1 <- freq
+    if (is.null(freq)) {
+        freq1 <- if (!missing(probability)) 
+            !as.logical(probability)
+        else equidist
+    }
+    else if (!missing(probability) && any(probability == freq)) 
+        stop("'probability' is an alias for '!freq', however they differ.")
+    diddle <- 1e-07 * stats::median(diff(breaks))
+    fuzz <- if (right) 
+        c(if (include.lowest) -diddle else diddle, rep.int(diddle, 
+            length(breaks) - 1))
+    else c(rep.int(-diddle, length(breaks) - 1), if (include.lowest) diddle else -diddle)
+    fuzzybreaks <- breaks + fuzz
+    h <- diff(fuzzybreaks)
+    storage.mode(x) <- "double"
+    storage.mode(fuzzybreaks) <- "double"
+    counts <- .C("bincount", x, as.integer(n), fuzzybreaks, as.integer(nB), 
+        counts = integer(nB - 1), right = as.logical(right), 
+        include = as.logical(include.lowest), naok = FALSE, NAOK = FALSE, 
+        DUP = FALSE, PACKAGE = "base")$counts
+    if (any(counts < 0)) 
+        stop("negative 'counts'. Internal Error in C-code for \"bincount\"")
+    if (sum(counts) < n) 
+        stop("some 'x' not counted; maybe 'breaks' do not span range of 'x'")
+    #dens <- counts/(n * h)
+    # Stop the STUPID behaviour of having the probabilities not
+    # sum to one. 
+    dens <- 100*counts/n
+    mids <- 0.5 * (breaks[-1] + breaks[-nB])
+    r <- structure(list(breaks = breaks, counts = counts, intensities = dens, 
+        density = dens, mids = mids, xname = xname, equidist = equidist), 
+        class = "histogram")
+    if (plot) {
+        plot(r, freq = freq1, col = col, border = border, angle = angle, 
+            density = density, main = main, xlim = xlim, ylim = ylim, 
+            xlab = xlab, ylab = ylab, axes = axes, labels = labels, 
+            ...)
+        invisible(r)
+    }
+    else {
+        nf <- names(formals())
+        nf <- nf[is.na(match(nf, c("x", "breaks", "nclass", "plot", 
+            "include.lowest", "right")))]
+        missE <- lapply(nf, function(n) substitute(missing(.), 
+            list(. = as.name(n))))
+        not.miss <- !sapply(missE, eval, envir = environment())
+        if (any(not.miss)) 
+            warning(sprintf(ngettext(sum(not.miss), "argument %s is not made use of", 
+                "arguments %s are not made use of"), paste(sQuote(nf[not.miss]), 
+                collapse = ", ")), domain = NA)
+        r
+    }
+}
+# Adjusts the labelling for piecharts - default behaviour of pie{} seems
+# to be slightly left aligned
+
+my.pie <- 
+function (x, labels = names(x), edges = 200, radius = 0.8, clockwise = FALSE, 
+    init.angle = if (clockwise) 90 else 0, density = NULL, angle = 45, 
+    col = NULL, border = NULL, lty = NULL, main = NULL, ...) 
+{
+    if (!is.numeric(x) || any(is.na(x) | x < 0)) 
+        stop("'x' values must be positive.")
+    if (is.null(labels)) 
+        labels <- as.character(1:length(x))
+    x <- c(0, cumsum(x)/sum(x))
+    dx <- diff(x)
+    nx <- length(dx)
+    plot.new()
+    pin <- par("pin")
+    xlim <- ylim <- c(-1, 1)
+    if (pin[1] > pin[2]) 
+        xlim <- (pin[1]/pin[2]) * xlim
+    else ylim <- (pin[2]/pin[1]) * ylim
+    plot.window(xlim, ylim, "", asp = 1)
+    if (is.null(col)) 
+        col <- if (is.null(density)) 
+            c("white", "lightblue", "mistyrose", "lightcyan", 
+                "lavender", "cornsilk")
+        else par("fg")
+    col <- rep(col, length.out = nx)
+    border <- rep(border, length.out = nx)
+    lty <- rep(lty, length.out = nx)
+    angle <- rep(angle, length.out = nx)
+    density <- rep(density, length.out = nx)
+    twopi <- if (clockwise) 
+        -2 * pi
+    else 2 * pi
+    t2xy <- function(t) {
+        t2p <- twopi * t + init.angle * pi/180
+        list(x = radius * cos(t2p), y = radius * sin(t2p))
+    }
+    for (i in 1:nx) {
+        n <- max(2, floor(edges * dx[i]))
+        P <- t2xy(seq(x[i], x[i + 1], length = n))
+        polygon(c(P$x, 0), c(P$y, 0), density = density[i], angle = angle[i], 
+            border = border[i], col = col[i], lty = lty[i])
+        P <- t2xy(mean(x[i + 0:1]))
+        lab <- as.character(labels[i])
+        if (!is.na(lab) && nchar(lab)) {
+            lines(c(1, 1.05) * P$x, c(1, 1.05) * P$y)
+#            text(1.1 * P$x, 1.1 * P$y, labels[i], xpd = TRUE, 
+#                adj = ifelse(P$x < 0, 1, 0), ...)
+            # Slight change to label adjustment
+            text(1.1 * P$x, 1.1 * P$y, labels[i], xpd = TRUE, col=1,
+                adj = c(.5*(1-P$x/radius),.5*(1-P$y/radius)), ...)
+            
+        }
+    }
+    title(main = main, ...)
+    invisible(NULL)
+}
+id <- function(x, y, lty = 3, ...) {
+  usr <- par("usr")
+  n <- length(x)
+  xstart <- c(rep(usr[1], n), x)
+  xend <- rep(x,2)
+  ystart <- rep(y,2)
+  yend <- c(y, rep(usr[3], n))
+  segments(xstart, ystart, xend, yend, lty = lty, ...)
+}
 ## change the function legend so that the border for boxes in the legend
 ## isn't always black
 
@@ -259,3 +432,36 @@ legendrc <- function (x, y = NULL, legend, fill = NULL, col = par("col"),
     invisible(list(rect = list(w = w, h = h, left = left, top = top), 
         text = list(x = xt, y = yt)))
 }
+mxyline <- function(m, x, y, ...){
+  abline(y-m*x, m, ...)
+}
+shape <- function (expr, from, to, n = 101, anchor=NULL, above=F, ...) 
+{
+    sexpr <- substitute(expr)
+    if (is.name(sexpr)) {
+        fcall <- paste(sexpr, "(x)")
+        expr <- parse(text = fcall)
+      }
+    else {
+        if (!(is.call(sexpr) && match("x", all.vars(sexpr), nomatch = 0))) 
+            stop("'expr' must be a function or an expression containing 'x'")
+        expr <- sexpr
+      }
+    x <- seq.int(from, to, length = n)
+    y <- eval(expr, envir = list(x = x), enclos = parent.frame())
+    if(is.null(anchor))
+      anchor <- ifelse(above, max(y), min(y))
+    polygon(x[c(1, 1:n, n)], c(anchor, y, anchor), 
+        ...)
+
+# Examples of the function's use    
+# curve(dnorm(x), -2, 2, ylim=c(-.1, 0.5))
+# shape(dnorm(x), -2, -1.5)
+# shape(dnorm(x), -1.4, -1, col=3)
+# shape(dnorm(x), -.8, 0, col=4, anchor=-.1)
+# shape(dnorm(x), 0.3, 1, col=5, above=T)
+# shape(dnorm(x), 1.2, 1.8, col=5, border=3, above=T, anchor=0.5)
+    
+}
+
+
