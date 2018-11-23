@@ -1,3 +1,5 @@
+#' What operating system are we on?
+#' @return character naming the OS
 get_os <- function(){
     sysinf <- Sys.info()
         if (!is.null(sysinf)){
