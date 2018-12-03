@@ -6,7 +6,7 @@
 
 view <- function(df, what=c("csv", "xlsx"), where=Sys.getenv("TMPDIR")){
     require(readr)
-    require(xlsx)
+    require(readxl)
     what <- match.arg(what)
     fn <- gsub("[^A-Za-z0-9_-]", "", deparse(substitute(df)))
     name <- paste0(fn, format(Sys.time(), "-%Y-%m-%d-%H-%M-%S."), what)
