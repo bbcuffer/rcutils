@@ -3,10 +3,9 @@
 #' @param what the format to save the df in (supports csv and xlsx)
 #' @param where the folder to which the data will be saved
 #' @return a character giving the full path for the sheet
-
 view <- function(df, what=c("csv", "xlsx"), where=Sys.getenv("TMPDIR")){
     require(readr)
-    require(xlsx)
+    require(readxl)
     what <- match.arg(what)
     fn <- gsub("[^A-Za-z0-9_-]", "", deparse(substitute(df)))
     name <- paste0(fn, format(Sys.time(), "-%Y-%m-%d-%H-%M-%S."), what)

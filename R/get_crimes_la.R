@@ -1,5 +1,3 @@
-## pacman::p_load('tidyverse', 'httr', 'jsonlite')
-
 get_crimes_la <- function(code = 'E09000019', type = 'burglary',
                           from = '2018-04', to = '2018-06') {
     require(tidyverse)
