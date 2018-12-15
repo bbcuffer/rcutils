@@ -13,19 +13,22 @@ quantiles <- function(x, n, include.lowest=T, ...){
   cut(x, quantile(x, split), include.lowest=include.lowest, ...)
 }
 
-#' Cut a vector into N equal parts
+#' Cut a vector into n equal parts
 #' @param x A numeric vector.
 #' @param n The number of equal sized parts.
 #' @param include.lowest Passed to \code{\link{cut}}. The default value used here (T)
 #'    overwrites \code{cut}'s usual behaviour
 #'    of excluding the lowest value in the dataset from any group.
 #' @param ... other arguments passed to \code{\link{cut}}
-#' @return a character vector, dividing x in to Nths, with values  "1 of N", "2 of N", ... "N of N"
+#' @return An ordered factor, dividing x in to n-ths, with values
+#' "1ofn" < "2ofn", < ... < "nofn"
 cut_into_n <- function(x, n, include.lowest=T, ...){
   split <- 0:n/n
   labns <- paste0(1:n, "of", n)
-  labns[c(1,n)] <- c("small","large")
-  cut(x, quantile(x, split, na.rm=TRUE), include.lowest=include.lowest, labels=labns, ...)
+  ## labns[c(1,n)] <- c("small","large")
+  cut_up <- cut(x, quantile(x, split, na.rm=TRUE),
+                include.lowest=include.lowest, labels=labns, ...)
+  as.ordered(cut_up)
 }
 
 #' Cut a vector at breakpoints defined by quantiles
