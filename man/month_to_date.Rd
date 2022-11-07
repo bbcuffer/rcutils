@@ -4,8 +4,7 @@
 \alias{month_to_date}
 \title{Convert a string containing month-and-year to a lubridate date}
 \usage{
-month_to_date(months, when = c("beginning", "middle", "end"),
-  format = "dmy")
+month_to_date(months, when = c("beginning", "middle", "end"), format = "dmy")
 }
 \arguments{
 \item{months}{A character vector in a month/year format that lubridate might recognise}

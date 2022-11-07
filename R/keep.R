@@ -13,7 +13,7 @@
 #'
 #  For whatever reason, I CANNOT get this link to the "rm" function to actually create a hyperlink
 #' @seealso \code{\link[base]{rm}}
-#'
+#' @export
 keep <- function(..., x = c())
   {
 

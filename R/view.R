@@ -1,24 +1,24 @@
-#' Push data frame df to spreadsheet and (on a mac only) view using system default (e.g. Excel)
-#' @param df the data frame to be saved and viewed
-#' @param what the format to save the df in (supports csv and xlsx)
-#' @param where the folder to which the data will be saved
-#' @return a character giving the full path for the sheet
-view <- function(df, what=c("csv", "xlsx"), where=Sys.getenv("TMPDIR")){
-    require(readr)
-    require(readxl)
-    what <- match.arg(what)
-    fn <- gsub("[^A-Za-z0-9_-]", "", deparse(substitute(df)))
-    name <- paste0(fn, format(Sys.time(), "-%Y-%m-%d-%H-%M-%S."), what)
-    path <- file.path(where, name)
-    ## print(paste("Creating", path))
-    switch(what,
-           csv = readr::write_csv(df, path, na=""),
-           xlsx = xlsx::write.xlsx(df, path)
-           )
-    ## write.csv(df, path)
-    if(get_os() == "osx") {
-        system2("open", path)
-        print(paste("Opening", path))
-    }
-    invisible(path)
+#' Look at a dataframe using a spreadsheet package. Mac only.
+#'
+#' You can't edit the dataframe - it just writes the dataframe to a tempfile which it then opens. 
+#'
+#' @param df the data frame
+#' @param app the program used to show it. Defaults to Apple's Numbers. Excel also an option.
+#'
+#' @return nothing, just opens a spreadsheet showing the dataframe. 
+#'
+#' @examples
+#'
+#' demo <- tibble(alpha=letters, num=rnorm(26))
+#' views(demo)
+#' views(demo, "Excel")
+#' views(demo, "E")
+#' @export
+views <- function(df, app=c("Numbers", "Excel")){
+  app01 <- match.arg(app)
+  app02 <- gsub("Excel", "Microsoft Excel", app01)
+  fn <- tempfile(fileext=".csv")
+  write_csv(df, fn)
+  arg <- paste0('-a "', app02, '" ', fn)
+  system2("open", arg)
 }

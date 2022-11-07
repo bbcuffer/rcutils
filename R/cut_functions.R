@@ -10,6 +10,7 @@
 #' @examples
 #' cut_into_n(100:1, 3)
 #' @seealso \code{\link{cut_at}}
+#' @export
 cut_into_n <- function(x, n, labels=paste0(1:n, "of", n), ...){
   split <- 0:n/n
   cut_up <- cut(x, quantile(x, split, na.rm=TRUE), labels=labels,
@@ -30,6 +31,7 @@ cut_into_n <- function(x, n, labels=paste0(1:n, "of", n), ...){
 #' @examples
 #' cut_at(100:1, c(25, 75))
 #' @seealso \code{\link{cut_into_n}}
+#' @export
 cut_at <- function(x, at, ...){
     at <- sort(at)
     if(min(at) > 0) at <- c(0, at)
