@@ -15,10 +15,34 @@
 #' views(demo, "E")
 #' @export
 views <- function(df, app=c("Numbers", "Excel")){
-  app01 <- match.arg(app)
-  app02 <- gsub("Excel", "Microsoft Excel", app01)
   fn <- tempfile(fileext=".csv")
   write_csv(df, fn)
+  app01 <- match.arg(app)  
+  checkscel(fn, app01)
+}
+
+#' fix the spaces and brackets in Dropbox (BBC) and Visual Journalism
+#' so that they don't break the command line arguments of system2()
+#'
+#' @param path the file path to be made safe
+#' @export
+safe_fn <- function(path){
+  ## fix the spaces and brackets in Dropbox (BBC) and Visual Journalism
+  ## so that they don't break the command line arguments of system2()
+  str_replace_all(path,
+    c(" "="\\\\ ",
+      "\\("="\\\\\\(",
+      "\\)"="\\\\\\)"))
+}
+
+#' open a spreadsheet
+#'
+#' @param path where it is
+#' @param app how to open it: Excel or Numbers
+checkscel <- function(path, app=c("Excel", "Numbers")){
+  app01 <- match.arg(app)
+  app02 <- gsub("Excel", "Microsoft Excel", app01)
+  fn <- safe_fn(path)
   arg <- paste0('-a "', app02, '" ', fn)
   system2("open", arg)
 }
