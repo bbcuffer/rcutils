@@ -18,7 +18,7 @@ views <- function(df, app=c("Numbers", "Excel")){
   fn <- tempfile(fileext=".csv")
   write_csv(df, fn)
   app01 <- match.arg(app)  
-  checkscel(fn, app01)
+  chexcel(fn, app01)
 }
 
 #' fix the spaces and brackets in Dropbox (BBC) and Visual Journalism
@@ -37,10 +37,12 @@ safe_fn <- function(path){
 
 #' open a spreadsheet
 #'
+#' Tested on mac only
+#' 
 #' @param path where it is
 #' @param app how to open it: Excel or Numbers
 #' @export
-checkscel <- function(path, app=c("Excel", "Numbers")){
+chexcel <- function(path, app=c("Excel", "Numbers")){
   app01 <- match.arg(app)
   app02 <- gsub("Excel", "Microsoft Excel", app01)
   fn <- safe_fn(path)
