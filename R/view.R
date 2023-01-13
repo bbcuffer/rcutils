@@ -39,6 +39,7 @@ safe_fn <- function(path){
 #'
 #' @param path where it is
 #' @param app how to open it: Excel or Numbers
+#' @export
 checkscel <- function(path, app=c("Excel", "Numbers")){
   app01 <- match.arg(app)
   app02 <- gsub("Excel", "Microsoft Excel", app01)
