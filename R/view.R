@@ -29,7 +29,7 @@ views <- function(df, app=c("Numbers", "Excel")){
 safe_fn <- function(path){
   ## fix the spaces and brackets in Dropbox (BBC) and Visual Journalism
   ## so that they don't break the command line arguments of system2()
-  str_replace_all(path,
+  stringr::str_replace_all(path,
     c(" "="\\\\ ",
       "\\("="\\\\\\(",
       "\\)"="\\\\\\)"))
@@ -48,4 +48,14 @@ chexcel <- function(path, app=c("Excel", "Numbers")){
   fn <- safe_fn(path)
   arg <- paste0('-a "', app02, '" ', fn)
   system2("open", arg)
+}
+
+#' Open a directory in Finder
+#'
+#' Does a bit of work to allow for BBC Dropbox folder names
+#' @param dir The name of the directory. Default is the Dropbox project dir.
+#' @export
+dbdir <- function(dir=config$db_proj){
+  the_dir <- safe_fn(dir)
+  system2("open", the_dir)
 }
