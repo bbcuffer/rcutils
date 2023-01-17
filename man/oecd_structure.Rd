@@ -4,11 +4,14 @@
 \alias{oecd_structure}
 \title{Get the variable names and code/decode pairs for an OECD dataset}
 \usage{
-oecd_structure(dataset)
+oecd_structure(dataset, fancy = T)
 }
 \arguments{
 \item{dataset}{the name of the dataset on the OECD data system. For a list of
 OECD datasets, use OECD::get_datasets()}
+
+\item{fancy}{do I want the output to come as one big data frame (`fancy=F`) or as
+a list of dataframe, with each dataframe tailored to one part of the structure}
 }
 \description{
 Get the variable names and code/decode pairs for an OECD dataset
@@ -16,4 +19,5 @@ Get the variable names and code/decode pairs for an OECD dataset
 \examples{
 oecd_structure("NAAG")
 oecd_structure("SNA_TABLE8A")
+oecd_structure("SNA_TABL8A", fancy=F)
 }
