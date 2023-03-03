@@ -9,14 +9,14 @@
 #'
 #' @examples
 #'
-#' demo <- tibble(alpha=letters, num=rnorm(26))
+#' demo <- data.frame(alpha=letters, num=rnorm(26))
 #' views(demo)
 #' views(demo, "Excel")
 #' views(demo, "E")
 #' @export
 views <- function(df, app=c("Numbers", "Excel")){
   fn <- tempfile(fileext=".csv")
-  write_csv(df, fn)
+  readr::write_csv(df, fn)
   app01 <- match.arg(app)  
   chexcel(fn, app01)
 }
@@ -56,6 +56,15 @@ chexcel <- function(path, app=c("Excel", "Numbers")){
 #' @param dir The name of the directory. Default is the Dropbox project dir.
 #' @export
 dbdir <- function(dir=config$db_proj){
-  the_dir <- safe_fn(dir)
-  system2("open", the_dir)
+  file.open(dir)
+}
+
+#' Open a file
+#'
+#' Does a bit of work to allow for BBC Dropbox folder names
+#' @param dir The name of the file. 
+#' @export
+file.open <- function(path){
+  the_path <- safe_fn(path)
+  system2("open", the_path)
 }

@@ -19,7 +19,7 @@ You can't edit the dataframe - it just writes the dataframe to a tempfile which 
 }
 \examples{
 
-demo <- tibble(alpha=letters, num=rnorm(26))
+demo <- data.frame(alpha=letters, num=rnorm(26))
 views(demo)
 views(demo, "Excel")
 views(demo, "E")

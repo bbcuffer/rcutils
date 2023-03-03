@@ -23,3 +23,19 @@ between <- function(x, p, y=NULL){
 #' @export
 shrink <- function(rng, x)
    c( sum( c(1-x/2, x/2)*rng ), sum(c(x/2, 1-x/2)*rng) )
+
+
+#' show the current repo on github
+#' @export
+ghme <- function(){
+  .url <- function(x) system2("open", x)
+
+  file.path(here::here(), ".git/config") |>
+    readLines() |>
+    stringr::str_subset("url") |>
+    stringr::str_replace("\\\turl = ", "") |>
+    utils::browseURL()
+}
+
+
+

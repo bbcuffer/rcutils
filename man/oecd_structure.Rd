@@ -19,5 +19,5 @@ Get the variable names and code/decode pairs for an OECD dataset
 \examples{
 oecd_structure("NAAG")
 oecd_structure("SNA_TABLE8A")
-oecd_structure("SNA_TABL8A", fancy=F)
+oecd_structure("SNA_TABLE8A", fancy=FALSE)
 }

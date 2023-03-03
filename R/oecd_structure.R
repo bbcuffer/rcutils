@@ -10,7 +10,7 @@
 #' @examples
 #' oecd_structure("NAAG")
 #' oecd_structure("SNA_TABLE8A")
-#' oecd_structure("SNA_TABL8A", fancy=F)
+#' oecd_structure("SNA_TABLE8A", fancy=FALSE)
 #' @export
 oecd_structure <- function(dataset, fancy=T){
     url <- paste0("https://stats.oecd.org/restsdmx/sdmx.ashx/GetDataStructure/", 
@@ -18,10 +18,10 @@ oecd_structure <- function(dataset, fancy=T){
     data_structure <- readsdmx::read_sdmx(url)
     if(! fancy) return(data_structure) ## Basic data frame 
   else { ## Return a list of slightly-tidied-up data frames
-    ds2 <- data_structure %>%
-      as_tibble %>%
-      select(-id, -agencyID, -fr, -fr_description) %>%
-      relocate(en_description, .after=last_col()) %>%
+    ds2 <- data_structure |>
+      tibble::as_tibble() |> 
+      dplyr::select(-id, -agencyID, -fr, -fr_description) |> 
+      dplyr::relocate(en_description, .after=last_col()) |> 
       split(~en, drop=T)
     return(ds2) 
   }
