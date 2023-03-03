@@ -37,5 +37,13 @@ ghme <- function(){
     utils::browseURL()
 }
 
-
-
+#' Write an xls sheet to xlsx so you can open it with tidyxl
+#' @param fn the filename of a .xls spreadsheet
+#' @param sheet the worksheet to be xlsx_cells'ed. 
+#' @export
+tidyxls_sheet <- function(fn, sheet){
+  tmp_fn <- tempfile(fileext=".xlsx")
+  tmp <- readxl::read_excel(fn, sheet=sheet)
+  writexl::write_xlsx(tmp, tmp_fn)
+  tidyxl::xlsx_cells(tmp_fn)
+}
