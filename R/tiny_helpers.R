@@ -47,3 +47,39 @@ tidyxls_sheet <- function(fn, sheet){
   writexl::write_xlsx(tmp, tmp_fn)
   tidyxl::xlsx_cells(tmp_fn)
 }
+
+#' A plot preview window that shows if your title fits
+#'
+#' Plotting windows that match default dimensions for BBC outputs
+#' @param form template for the sizing of the output
+#' @param width,height,title finer control over sizing/title for plot window.
+#'   In inches. To convert from pixel size, divide by 72. 
+#'
+#' @examples
+#'
+#' plot_window("online")
+#' plot_window("tv")
+#' plot_window("online", height=800/72)
+#' 
+#' @export
+plot_window <- function(form=c("online", "tv", "portrait"),
+                        width=NULL, height=NULL, title=NULL){
+  form <- match.arg(form)
+
+  widths <- c(online = 640/72, tv=6.4, portrait=3.6)
+  heights <- c(online = 450/72, tv=3.6, portrait=6.4)
+
+  the_height <- heights[form]
+  the_width <- widths[form]
+
+  if(!is.null(width)) the_width <- width
+  if(!is.null(height)) the_height <- height
+  the_title <- ifelse(is.null(title), form, title)
+
+
+  dev.new(width=the_width, height=the_height,
+    noRStudioGD=TRUE, title=the_title)
+}
+
+
+                        
