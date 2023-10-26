@@ -22,7 +22,8 @@ oecd_structure <- function(dataset, fancy=T){
       tibble::as_tibble() |> 
       dplyr::select(-id, -agencyID, -fr, -fr_description) |> 
       dplyr::relocate(en_description, .after=last_col()) |> 
-      split(~en, drop=T)
+      split(~en, drop=T) |> 
+      purrr::map(\(x) select(x, -en))
     return(ds2) 
   }
 }
