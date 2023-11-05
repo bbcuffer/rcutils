@@ -3,6 +3,7 @@
 export(add_reveal_row)
 export(add_zero_state)
 export(between)
+export(bib_ons)
 export(bitlink)
 export(bitme)
 export(chexcel)
